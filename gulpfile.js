@@ -51,6 +51,16 @@ var styles = lazypipe()
   .pipe($.autoprefixer,'last 1 version')
   .pipe(gulp.dest,'./.tmp/styles');
 
+//把静态页面编入js
+var htmls=lazypipe()
+  .pipe($.ngHtml2js,{
+    moduleName:"activity",
+    prefix:"views/"
+  })
+  //.pipe($.htmlmin,{collapseWhitespace: true})
+  .pipe($.concat,"template.min.js")
+  // .pipe($.uglify)
+  .pipe(gulp.dest,'./.tmp/scripts');
 
 ///////////
 // Tasks //
@@ -59,6 +69,11 @@ var styles = lazypipe()
 gulp.task('styles',function(){
   return gulp.src(paths.styles)
     .pipe(styles());
+})
+
+gulp.task('html2js',function(){
+  return gulp.src(paths.views.files)
+    .pipe(htmls());
 })
 
 gulp.task('lint:scripts',function(){
@@ -87,7 +102,12 @@ gulp.task('start:server:test',function(){
 })
 
 gulp.task('start:client',['start:server','styles'],function(){
-  openUrl('http://localhost:9000/');
+   var options = {
+    uri: 'http://localhost:9000/#/activity',
+    app: 'chrome'
+  };
+  gulp.src(paths.views.main)
+  .pipe($.open(options));
 })
 
 gulp.task('watch',function(){
@@ -95,7 +115,12 @@ gulp.task('watch',function(){
     .pipe($.plumber())
     .pipe(styles())
     .pipe($.connect.reload());
-  
+    
+  $.watch(paths.views.files,function(){
+    gulp.src(paths.views.files)
+    .pipe(htmls());
+  })
+
   $.watch(paths.views.files)
     .pipe($.plumber())
     .pipe($.connect.reload());
