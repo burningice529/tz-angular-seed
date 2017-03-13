@@ -167,7 +167,8 @@ gulp.task('client:build',['styles','html2js'],function(){
   return gulp.src(paths.views.main)
     .pipe($.useref({searchPath:[config.app,'.tmp']}))
     .pipe(jsFilter)
-    //.pipe($.uglify()) //压缩
+    .pipe($.stripDebug())
+    .pipe($.uglify()) //压缩
     .pipe(jsFilter.restore)
     .pipe(cssFilter)
     .pipe($.cleanCss({cache: true}))
